@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Tiger Store</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header / Navbar -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1><a href="index.html" style="text-decoration: none; color: inherit;">Tiger store</a></h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>Search</button>
+            </div>
+            <div class="cart">
+                <span class="cart-icon"><a href="cart.html" style="text-decoration: none; color: inherit;">🛒</a></span>
+                <span class="cart-count">3</span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="electronics.html">Electronics</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="about.html">About Us</a>
+        </nav>
+    </header>
+
+    <!-- Main Layout -->
+    <main>
+        <!-- Category Sidebar -->
+        <aside class="sidebar">
+            <h2>Categories</h2>
+            <ul class="category-list">
+                <li><a href="products.html">All Products</a></li>
+                <li><a href="#electronics">Electronics</a></li>
+                <li><a href="#fashion">Fashion</a></li>
+                <li><a href="#home-living">Home & Living</a></li>
+                <li><a href="#sports">Sports</a></li>
+                <li><a href="#beauty">Beauty</a></li>
+            </ul>
+            <div class="price-range">
+                <h3>Price Range</h3>
+                <label><input type="checkbox"> Under ₦5,000</label>
+                <label><input type="checkbox"> Under ₦20,000</label>
+                <label><input type="checkbox"> ₦50,000+</label>
+            </div>
+            <div class="rating-filter">
+                <h3>Rating</h3>
+                <div class="stars">★★★★★</div>
+                <div class="stars">★★★★☆</div>
+                <div class="stars">★★★☆☆</div>
+                <div class="stars">★★☆☆☆</div>
+            </div>
+            <button class="apply-filters">Apply Filters</button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="main-content">
+            <h2 style="margin-bottom: 2rem;">All Products</h2>
+            
+            <!-- Product Grid -->
+            <div class="product-grid">
+                <article class="product-card">
+                    <div class="discount-badge">20% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="Wireless Headphones">
+                    <h3>Wireless Headphones</h3>
+                    <p>High-quality sound with noise cancellation.</p>
+                    <div class="price">
+                        <span class="original">₦15,000</span>
+                        <span class="discounted">₦12,000</span>
+                    </div>
+                    <div class="rating">★★★★★</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+
+                <article class="product-card">
+                    <div class="discount-badge">15% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_68_BEST-IPHONE-16-CASES-2048px-4833-2x1-1.jpg" alt="Smartphone Case">
+                    <h3>Smartphone Case</h3>
+                    <p>Durable protection for your device.</p>
+                    <div class="price">
+                        <span class="original">₦3,000</span>
+                        <span class="discounted">₦2,550</span>
+                    </div>
+                    <div class="rating">★★★★☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+
+                <article class="product-card">
+                    <div class="discount-badge">30% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_83_k-lYSkUcwk-3yX8av8w8Rg.c-r.jpg" alt="Laptop Stand">
+                    <h3>Laptop Stand</h3>
+                    <p>Ergonomic design for better posture.</p>
+                    <div class="price">
+                        <span class="original">₦10,000</span>
+                        <span class="discounted">₦7,000</span>
+                    </div>
+                    <div class="rating">★★★★★</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+
+                <article class="product-card">
+                    <div class="discount-badge">10% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="USB-C Cable">
+                    <h3>USB-C Cable</h3>
+                    <p>Fast charging and data transfer.</p>
+                    <div class="price">
+                        <span class="original">₦2,500</span>
+                        <span class="discounted">₦2,250</span>
+                    </div>
+                    <div class="rating">★★★★☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+
+                <article class="product-card">
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_68_BEST-IPHONE-16-CASES-2048px-4833-2x1-1.jpg" alt="Portable Speaker">
+                    <h3>Portable Speaker</h3>
+                    <p>Waterproof with powerful bass.</p>
+                    <div class="price">
+                        <span class="discounted">₦8,000</span>
+                    </div>
+                    <div class="rating">★★★★★</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+
+                <article class="product-card">
+                    <div class="discount-badge">25% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_83_k-lYSkUcwk-3yX8av8w8Rg.c-r.jpg" alt="Screen Protector">
+                    <h3>Screen Protector</h3>
+                    <p>Tempered glass for maximum protection.</p>
+                    <div class="price">
+                        <span class="original">₦4,000</span>
+                        <span class="discounted">₦3,000</span>
+                    </div>
+                    <div class="rating">★★★☆☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background-color: #2c3e50; color: white; text-align: center; padding: 2rem; margin-top: 3rem;">
+        <p>&copy; 2026 Tiger Store. All rights reserved.</p>
+    </footer>
+</body>
+</html>

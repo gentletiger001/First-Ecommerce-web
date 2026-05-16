@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce Store</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header / Navbar -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1><a href="index.html" style="text-decoration: none; color: inherit;">Tiger store</a></h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>Search</button>
+            </div>
+            <div class="cart">
+                <span class="cart-icon"><a href="cart.html" style="text-decoration: none; color: inherit;">🛒</a></span>
+                <span class="cart-count">3</span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="electronics.html">Electronics</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="about.html">About Us</a>
+        </nav>
+    </header>
+
+    <!-- Main Layout -->
+    <main>
+        <!-- Category Sidebar -->
+        <aside class="sidebar">
+            <h2>Categories</h2>
+            <ul class="category-list">
+                <li><a href="#all-products">All Products</a></li>
+                <li><a href="#electronics">Electronics</a></li>
+                <li><a href="#fashion">Fashion</a></li>
+                <li><a href="#home-living">Home & Living</a></li>
+                <li><a href="#sports">Sports</a></li>
+                <li><a href="#beauty">Beauty</a></li>
+            </ul>
+            <div class="price-range">
+                <h3>Price Range</h3>
+                <label><input type="checkbox"> Under ₦5,000</label>
+                <label><input type="checkbox"> Under ₦20,000</label>
+                <label><input type="checkbox"> ₦50,000+</label>
+            </div>
+            <div class="rating-filter">
+                <h3>Rating</h3>
+                <div class="stars">★★★★★</div>
+                <div class="stars">★★★★☆</div>
+                <div class="stars">★★★☆☆</div>
+                <div class="stars">★★☆☆☆</div>
+            </div>
+            <button class="apply-filters">Apply Filters</button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="main-content">
+            <!-- Product Grid -->
+            <div class="product-grid">
+                <article class="product-card">
+                    <div class="discount-badge">20% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="Product 1">
+                    <h3>Wireless Headphones</h3>
+                    <p>High-quality sound with noise cancellation.</p>
+                    <div class="price">
+                        <span class="original">₦15,000</span>
+                        <span class="discounted">₦12,000</span>
+                    </div>
+                    <div class="rating">★★★★★</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">15% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_68_BEST-IPHONE-16-CASES-2048px-4833-2x1-1.jpg" alt="Product 2">
+                    <h3>Smartphone Case</h3>
+                    <p>Durable protection for your device.</p>
+                    <div class="price">
+                        <span class="original">₦3,000</span>
+                        <span class="discounted">₦2,550</span>
+                    </div>
+                    <div class="rating">★★★★☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">30% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_83_k-lYSkUcwk-3yX8av8w8Rg.c-r.jpg" alt="Product 3">
+                    <h3>Laptop Stand</h3>
+                    <p>Ergonomic design for better posture.</p>
+                    <div class="price">
+                        <span class="original">₦10,000</span>
+                        <span class="discounted">₦7,000</span>
+                    </div>
+                    <div class="rating">★★★★★</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">10% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_65_10333_l_collage vintage design .jpg" alt="Product 4">
+                    <h3>T-Shirt</h3>
+                    <p>Cotton fabric, comfortable fit.</p>
+                    <div class="price">
+                        <span class="original">₦5,000</span>
+                        <span class="discounted">₦4,500</span>
+                    </div>
+                    <div class="rating">★★★☆☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">25% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_95_mhl-opener-run-shoes-311-67edd9f20e75a.jpg" alt="Product 5">
+                    <h3>Running Shoes</h3>
+                    <p>Lightweight and breathable.</p>
+                    <div class="price">
+                        <span class="original">₦20,000</span>
+                        <span class="discounted">₦15,000</span>
+                    </div>
+                    <div class="rating">★★★★☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">5% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_92_skincare-jar-cosmetic-anti-aging-260nw-2405853905.jpg" alt="Product 6">
+                    <h3>Face Cream</h3>
+                    <p>Hydrating formula for all skin types.</p>
+                    <div class="price">
+                        <span class="original">₦8,000</span>
+                        <span class="discounted">₦7,600</span>
+                    </div>
+                    <div class="rating">★★★★★</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">40% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_5_default.jpg" alt="Product 7">
+                    <h3>Bluetooth Speaker</h3>
+                    <p>Portable with excellent bass.</p>
+                    <div class="price">
+                        <span class="original">₦25,000</span>
+                        <span class="discounted">₦15,000</span>
+                    </div>
+                    <div class="rating">★★★★☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+                <article class="product-card">
+                    <div class="discount-badge">18% OFF</div>
+                    <div class="wishlist">♥</div>
+                    <img src="./img/imgi_39_default.jpg" alt="Product 8">
+                    <h3>Yoga Mat</h3>
+                    <p>Non-slip surface for workouts.</p>
+                    <div class="price">
+                        <span class="original">₦12,000</span>
+                        <span class="discounted">₦9,840</span>
+                    </div>
+                    <div class="rating">★★★☆☆</div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </article>
+            </div>
+
+            <!-- Product Detail Section -->
+            <div class="product-detail">
+                <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="Featured Product">
+                <div class="detail-info">
+                    <h2>Wireless Headphones</h2>
+                    <span class="category-tag">Electronics</span>
+                    <p>Experience superior sound quality with these wireless headphones featuring active noise cancellation, long battery life, and comfortable fit for all-day use.</p>
+                    <div class="price">
+                        <span class="original">₦15,000</span>
+                        <span class="discounted">₦12,000</span>
+                        <div class="discount-badge">20% OFF</div>
+                    </div>
+                    <div class="selectors">
+                        <div class="size-selector">
+                            <label>Size:</label>
+                            <div class="options">
+                                <div class="option selected">S</div>
+                                <div class="option">M</div>
+                                <div class="option">L</div>
+                            </div>
+                        </div>
+                        <div class="color-selector">
+                            <label>Color:</label>
+                            <div class="options">
+                                <div class="option selected" style="background-color: black;"></div>
+                                <div class="option" style="background-color: white;"></div>
+                                <div class="option" style="background-color: blue;"></div>
+                            </div>
+                        </div>
+                        <div class="quantity-selector">
+                            <label>Quantity:</label>
+                            <button class="qty-btn">-</button>
+                            <span class="qty">1</span>
+                            <button class="qty-btn">+</button>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="add-to-cart primary">Add to Cart</button>
+                        <button class="buy-now">Buy Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>ShopEase</h3>
+                <p>Your one-stop shop for everything.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Shop</h4>
+                <a href="#">All Products</a>
+                <a href="#">Electronics</a>
+                <a href="#">Fashion</a>
+            </div>
+            <div class="footer-section">
+                <h4>Help</h4>
+                <a href="#">Contact Us</a>
+                <a href="#">Shipping</a>
+                <a href="#">Returns</a>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+                <a href="#">Instagram</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Tiger store. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
