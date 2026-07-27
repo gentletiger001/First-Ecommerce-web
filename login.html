@@ -53,6 +53,15 @@
             font-size: 1rem;
         }
 
+        .password-toggle {
+            margin-top: 0.35rem;
+            font-size: 0.9rem;
+            color: #0066cc;
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+        }
+
         .auth-form input:focus {
             outline: none;
             border-color: #0066cc;
@@ -98,6 +107,7 @@
 
                 <label for="password">Password</label>
                 <input id="password" name="password" type="password" required>
+                <div class="password-toggle" data-password-toggle="password">Show password</div>
                 <div class="error-text" data-error-for="form"></div>
 
                 <button type="submit">Login</button>
@@ -113,6 +123,15 @@
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             const errorField = document.querySelector('[data-error-for="form"]');
+            const toggleLink = document.querySelector('.password-toggle');
+
+            if (toggleLink) {
+                toggleLink.addEventListener('click', function () {
+                    const isHidden = passwordField.type === 'password';
+                    passwordField.type = isHidden ? 'text' : 'password';
+                    toggleLink.textContent = isHidden ? 'Hide password' : 'Show password';
+                });
+            }
 
             form.addEventListener('submit', function (event) {
                 event.preventDefault();

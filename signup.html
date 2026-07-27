@@ -53,6 +53,15 @@
             font-size: 1rem;
         }
 
+        .password-toggle {
+            margin-top: 0.35rem;
+            font-size: 0.9rem;
+            color: #0066cc;
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+        }
+
         .auth-form input:focus {
             outline: none;
             border-color: #0066cc;
@@ -102,10 +111,12 @@
 
                 <label for="password">Password</label>
                 <input id="password" name="password" type="password" required>
+                <div class="password-toggle" data-password-toggle="password">Show password</div>
                 <div class="error-text" data-error-for="password"></div>
 
                 <label for="confirmPassword">Confirm Password</label>
                 <input id="confirmPassword" name="confirmPassword" type="password" required>
+                <div class="password-toggle" data-password-toggle="confirmPassword">Show password</div>
                 <div class="error-text" data-error-for="confirmPassword"></div>
 
                 <button type="submit">Sign Up</button>
@@ -124,6 +135,7 @@
             const confirmPasswordField = document.getElementById('confirmPassword');
             const fullNameField = document.getElementById('fullName');
             const errors = document.querySelectorAll('.error-text');
+            const toggleLinks = document.querySelectorAll('.password-toggle');
 
             function setError(fieldName, message) {
                 const currentError = document.querySelector('[data-error-for="' + fieldName + '"]');
@@ -137,6 +149,20 @@
                     element.textContent = '';
                 });
             }
+
+            toggleLinks.forEach(function (toggle) {
+                toggle.addEventListener('click', function () {
+                    const fieldName = toggle.getAttribute('data-password-toggle');
+                    const passwordField = document.getElementById(fieldName);
+                    if (!passwordField) {
+                        return;
+                    }
+
+                    const isHidden = passwordField.type === 'password';
+                    passwordField.type = isHidden ? 'text' : 'password';
+                    toggle.textContent = isHidden ? 'Hide password' : 'Show password';
+                });
+            });
 
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
