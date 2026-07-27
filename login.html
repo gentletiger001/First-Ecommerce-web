@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Tiger Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #f8faff 0%, #e8ecf5 100%);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 16px 32px rgba(0, 51, 153, 0.12);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 0.5rem;
+            color: #003d7a;
+        }
+
+        .auth-card p {
+            margin-bottom: 1.5rem;
+            color: #5c6b85;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .auth-form label {
+            font-weight: 600;
+            color: #003d7a;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #d4e0ff;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .auth-form button {
+            padding: 0.9rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .error-text {
+            color: #c0392b;
+            font-size: 0.9rem;
+            min-height: 1rem;
+        }
+
+        .auth-link {
+            margin-top: 1rem;
+            text-align: center;
+            color: #0066cc;
+        }
+
+        .auth-link a {
+            color: #0052a3;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-shell">
+        <div class="auth-card">
+            <h2>Welcome back</h2>
+            <p>Log in to your Tiger Store account.</p>
+            <form class="auth-form" id="loginForm">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" required>
+                <div class="error-text" data-error-for="form"></div>
+
+                <button type="submit">Login</button>
+            </form>
+            <p class="auth-link">New here? <a href="signup.html">Create an account</a></p>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const errorField = document.querySelector('[data-error-for="form"]');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                errorField.textContent = '';
+
+                const email = emailField.value.trim().toLowerCase();
+                const password = passwordField.value;
+                const users = window.tigerAuth.getUsers();
+                const matchedUser = users.find(function (user) {
+                    return user.email === email && user.password === password;
+                });
+
+                if (!matchedUser) {
+                    errorField.textContent = 'Invalid email or password';
+                    return;
+                }
+
+                window.tigerAuth.setCurrentUser(email);
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

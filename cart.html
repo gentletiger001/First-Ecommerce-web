@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - Tiger Store</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        (function () {
+            var currentUser = localStorage.getItem('currentUser');
+            var isAuthPage = ['login.html', 'signup.html'].indexOf(window.location.pathname.split('/').pop()) !== -1;
+            if (!isAuthPage && !currentUser) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
     <style>
         .cart-container {
             display: flex;
@@ -167,9 +176,13 @@
                 <input type="text" placeholder="Search products...">
                 <button>Search</button>
             </div>
-            <div class="cart">
-                <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
-                <span class="cart-count">3</span>
+            <div class="header-actions">
+                <a href="profile.html" class="header-link">Profile</a>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+                <div class="cart">
+                    <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
+                    <span class="cart-count">0</span>
+                </div>
             </div>
         </div>
         <nav class="nav-links">
@@ -186,60 +199,13 @@
         <h2>Shopping Cart</h2>
 
         <div class="cart-container">
-            <!-- Cart Items -->
-            <div class="cart-items">
-                <div class="cart-item">
-                    <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="Wireless Headphones">
-                    <div class="item-details">
-                        <h3>Wireless Headphones</h3>
-                        <p>Price: ₦12,000</p>
-                        <div class="item-quantity">
-                            <button>−</button>
-                            <span>1</span>
-                            <button>+</button>
-                        </div>
-                        <p style="margin-top: 0.5rem; font-weight: 600;">Subtotal: ₦12,000</p>
-                        <div class="remove-btn">Remove</div>
-                    </div>
-                </div>
+            <div class="cart-items" id="cartItems"></div>
 
-                <div class="cart-item">
-                    <img src="./img/imgi_68_BEST-IPHONE-16-CASES-2048px-4833-2x1-1.jpg" alt="Smartphone Case">
-                    <div class="item-details">
-                        <h3>Smartphone Case</h3>
-                        <p>Price: ₦2,550</p>
-                        <div class="item-quantity">
-                            <button>−</button>
-                            <span>1</span>
-                            <button>+</button>
-                        </div>
-                        <p style="margin-top: 0.5rem; font-weight: 600;">Subtotal: ₦2,550</p>
-                        <div class="remove-btn">Remove</div>
-                    </div>
-                </div>
-
-                <div class="cart-item">
-                    <img src="./img/imgi_83_k-lYSkUcwk-3yX8av8w8Rg.c-r.jpg" alt="Laptop Stand">
-                    <div class="item-details">
-                        <h3>Laptop Stand</h3>
-                        <p>Price: ₦7,000</p>
-                        <div class="item-quantity">
-                            <button>−</button>
-                            <span>1</span>
-                            <button>+</button>
-                        </div>
-                        <p style="margin-top: 0.5rem; font-weight: 600;">Subtotal: ₦7,000</p>
-                        <div class="remove-btn">Remove</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cart Summary -->
             <div class="cart-summary">
                 <h3>Order Summary</h3>
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span>₦21,550</span>
+                    <span id="subtotalValue">₦0</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping:</span>
@@ -247,12 +213,12 @@
                 </div>
                 <div class="summary-row">
                     <span>Tax:</span>
-                    <span>₦2,215</span>
+                    <span id="taxValue">₦0</span>
                 </div>
                 <div class="summary-total">
                     <div class="summary-row">
                         <span>Total:</span>
-                        <span>₦24,765</span>
+                        <span id="totalValue">₦0</span>
                     </div>
                 </div>
                 <button class="checkout-btn">Proceed to Checkout</button>
@@ -299,5 +265,83 @@
             <p>&copy; 2026 Tiger Store. All rights reserved.</p>
         </div>
     </footer>
+    <script src="auth.js"></script>
+    <script>
+        function formatCurrency(amount) {
+            return '₦' + Number(amount).toLocaleString();
+        }
+
+        function renderCart() {
+            const currentUser = window.tigerAuth.getCurrentUser();
+            if (!currentUser) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            const cartItems = document.getElementById('cartItems');
+            const subtotalValue = document.getElementById('subtotalValue');
+            const taxValue = document.getElementById('taxValue');
+            const totalValue = document.getElementById('totalValue');
+            const items = (currentUser.cart || []);
+            const subtotal = items.reduce(function (sum, item) {
+                return sum + Number(item.price || 0) * Number(item.quantity || 0);
+            }, 0);
+            const shipping = items.length ? 1000 : 0;
+            const tax = Math.round(subtotal * 0.1);
+            const total = subtotal + shipping + tax;
+
+            if (!items.length) {
+                cartItems.innerHTML = '<div class="empty-cart"><p>Your cart is empty.</p><a href="index.html" class="continue-shopping">Continue Shopping</a></div>';
+            } else {
+                cartItems.innerHTML = items.map(function (item) {
+                    const itemSubtotal = Number(item.price || 0) * Number(item.quantity || 0);
+                    return '<div class="cart-item">' +
+                        (item.image ? '<img src="' + item.image + '" alt="' + item.name + '">' : '') +
+                        '<div class="item-details">' +
+                        '<h3>' + item.name + '</h3>' +
+                        '<p>Price: ' + formatCurrency(item.price || 0) + '</p>' +
+                        '<div class="item-quantity">' +
+                        '<button class="qty-btn" data-name="' + item.name + '" data-action="decrease">−</button>' +
+                        '<span>' + item.quantity + '</span>' +
+                        '<button class="qty-btn" data-name="' + item.name + '" data-action="increase">+</button>' +
+                        '</div>' +
+                        '<p style="margin-top: 0.5rem; font-weight: 600;">Subtotal: ' + formatCurrency(itemSubtotal) + '</p>' +
+                        '<div class="remove-btn" data-name="' + item.name + '">Remove</div>' +
+                        '</div></div>';
+                }).join('');
+            }
+
+            subtotalValue.textContent = formatCurrency(subtotal);
+            taxValue.textContent = formatCurrency(tax);
+            totalValue.textContent = formatCurrency(total);
+            window.tigerAuth.updateCartBadge();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutButton = document.getElementById('logoutBtn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function () {
+                    window.tigerAuth.logout();
+                    window.location.href = 'login.html';
+                });
+            }
+            renderCart();
+        });
+
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+            if (target.classList.contains('remove-btn')) {
+                window.tigerAuth.removeFromCart(target.getAttribute('data-name'));
+                renderCart();
+            }
+
+            if (target.classList.contains('qty-btn')) {
+                const name = target.getAttribute('data-name');
+                const action = target.getAttribute('data-action');
+                window.tigerAuth.updateCartQuantity(name, action === 'increase' ? 1 : -1);
+                renderCart();
+            }
+        });
+    </script>
 </body>
 </html>

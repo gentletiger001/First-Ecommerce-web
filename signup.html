@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Tiger Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #f8faff 0%, #e8ecf5 100%);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 460px;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 16px 32px rgba(0, 51, 153, 0.12);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 0.5rem;
+            color: #003d7a;
+        }
+
+        .auth-card p {
+            margin-bottom: 1.5rem;
+            color: #5c6b85;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .auth-form label {
+            font-weight: 600;
+            color: #003d7a;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #d4e0ff;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .auth-form button {
+            padding: 0.9rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .error-text {
+            color: #c0392b;
+            font-size: 0.9rem;
+            min-height: 1rem;
+        }
+
+        .auth-link {
+            margin-top: 1rem;
+            text-align: center;
+            color: #0066cc;
+        }
+
+        .auth-link a {
+            color: #0052a3;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-shell">
+        <div class="auth-card">
+            <h2>Create your account</h2>
+            <p>Join Tiger Store and manage your cart and profile.</p>
+            <form class="auth-form" id="signupForm">
+                <label for="fullName">Full Name</label>
+                <input id="fullName" name="fullName" required>
+
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required>
+                <div class="error-text" data-error-for="email"></div>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" required>
+                <div class="error-text" data-error-for="password"></div>
+
+                <label for="confirmPassword">Confirm Password</label>
+                <input id="confirmPassword" name="confirmPassword" type="password" required>
+                <div class="error-text" data-error-for="confirmPassword"></div>
+
+                <button type="submit">Sign Up</button>
+                <div class="error-text" data-error-for="form"></div>
+            </form>
+            <p class="auth-link">Already have an account? <a href="login.html">Log in</a></p>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('signupForm');
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const confirmPasswordField = document.getElementById('confirmPassword');
+            const fullNameField = document.getElementById('fullName');
+            const errors = document.querySelectorAll('.error-text');
+
+            function setError(fieldName, message) {
+                const currentError = document.querySelector('[data-error-for="' + fieldName + '"]');
+                if (currentError) {
+                    currentError.textContent = message;
+                }
+            }
+
+            function clearErrors() {
+                errors.forEach(function (element) {
+                    element.textContent = '';
+                });
+            }
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                clearErrors();
+
+                const fullName = fullNameField.value.trim();
+                const email = emailField.value.trim().toLowerCase();
+                const password = passwordField.value;
+                const confirmPassword = confirmPasswordField.value;
+
+                if (!fullName) {
+                    setError('form', 'Please enter your full name.');
+                    return;
+                }
+
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(email)) {
+                    setError('email', 'Please enter a valid email address.');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    setError('password', 'Password must be at least 6 characters long.');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    setError('confirmPassword', 'Passwords do not match.');
+                    return;
+                }
+
+                const users = window.tigerAuth.getUsers();
+                const exists = users.some(function (user) {
+                    return user.email === email;
+                });
+
+                if (exists) {
+                    setError('form', 'This email is already registered.');
+                    return;
+                }
+
+                users.push({
+                    fullName: fullName,
+                    email: email,
+                    password: password,
+                    profile: {},
+                    cart: []
+                });
+
+                window.tigerAuth.saveUsers(users);
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -91,6 +91,28 @@ header {
     transform: scale(1.1);
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.header-link {
+    color: #0066cc;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.logout-btn {
+    border: none;
+    background: #f0f4ff;
+    color: #0052a3;
+    padding: 0.45rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
 .cart-count {
     position: absolute;
     top: -10px;
@@ -233,6 +255,22 @@ main {
     gap: 2rem;
 }
 
+.welcome-banner {
+    background: linear-gradient(135deg, #ecf5ff 0%, #dcecff 100%);
+    border: 1px solid #d4e0ff;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+.welcome-banner h2 {
+    margin-bottom: 0.3rem;
+    color: #003d7a;
+}
+
+.welcome-banner p {
+    color: #45607a;
+}
+
 .main-content h2 {
     color: #003d7a;
     font-size: 1.8rem;
@@ -276,6 +314,13 @@ main {
 
 .product-card:hover img {
     transform: scale(1.05);
+}
+
+.product-status {
+    color: #0052a3;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    min-height: 1.2rem;
 }
 
 .product-card h3 {

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Tiger Store</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-shell {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 12px 24px rgba(0, 51, 153, 0.08);
+        }
+
+        .profile-card h2 {
+            color: #003d7a;
+            margin-bottom: 1rem;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+        }
+
+        .profile-form label {
+            font-weight: 600;
+            color: #003d7a;
+        }
+
+        .profile-form input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #d4e0ff;
+            border-radius: 8px;
+        }
+
+        .profile-form button {
+            padding: 0.9rem 1rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .success-text {
+            color: #1b7f3b;
+            min-height: 1.2rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1><a href="index.html" class="logo-link">Tiger store</a></h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>Search</button>
+            </div>
+            <div class="cart">
+                <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
+                <span class="cart-count">0</span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="electronics.html">Electronics</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="about.html">About Us</a>
+            <a href="profile.html">Profile</a>
+        </nav>
+    </header>
+
+    <main class="profile-shell">
+        <div class="profile-card">
+            <h2>Your Profile</h2>
+            <p>Update your personal details below.</p>
+            <form class="profile-form" id="profileForm">
+                <label for="name">Full Name</label>
+                <input id="name" name="name" required>
+
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required>
+
+                <label for="password">New Password</label>
+                <input id="password" name="password" type="password" placeholder="Leave blank to keep current password">
+
+                <button type="submit">Save Changes</button>
+                <div class="success-text" id="profileMessage"></div>
+            </form>
+        </div>
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const profile = window.tigerAuth.getCurrentUser();
+            if (!profile) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('name').value = profile.fullName || '';
+            document.getElementById('email').value = profile.email || '';
+
+            document.getElementById('profileForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim().toLowerCase();
+                const password = document.getElementById('password').value;
+                const message = document.getElementById('profileMessage');
+
+                if (!name) {
+                    message.textContent = 'Please enter your full name.';
+                    return;
+                }
+
+                const users = window.tigerAuth.getUsers();
+                const currentUser = window.tigerAuth.getCurrentUser();
+                const index = users.findIndex(function (user) {
+                    return user.email === currentUser.email;
+                });
+
+                if (index === -1) {
+                    return;
+                }
+
+                const existingEmail = users.some(function (user, userIndex) {
+                    return userIndex !== index && user.email === email;
+                });
+
+                if (existingEmail) {
+                    message.textContent = 'An account with this email already exists.';
+                    return;
+                }
+
+                users[index].fullName = name;
+                users[index].email = email;
+                if (password) {
+                    users[index].password = password;
+                }
+                window.tigerAuth.saveUsers(users);
+                window.tigerAuth.setCurrentUser(email);
+                message.textContent = 'Profile updated successfully.';
+            });
+        });
+    </script>
+</body>
+</html>

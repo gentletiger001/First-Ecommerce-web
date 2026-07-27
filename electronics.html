@@ -6,7 +6,7 @@
     <title>Electronics - Tiger Store</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-page="electronics">
     <!-- Header / Navbar -->
     <header>
         <div class="navbar">
@@ -14,8 +14,8 @@
                 <h1><a href="index.html" class="logo-link">Tiger store</a></h1>
             </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search products...">
-                <button>Search</button>
+                <input id="productSearch" type="text" placeholder="Search products...">
+                <button id="searchButton" type="button">Search</button>
             </div>
             <div class="cart">
                 <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
@@ -37,9 +37,11 @@
         <aside class="sidebar">
             <h2>Categories</h2>
             <ul class="category-list">
-                <li><a href="products.html">All Products</a></li>
-                <li><a href="electronics.html">Electronics</a></li>
-                <li><a href="#home-living">Home & Living</a></li>
+               <li><a href="./index.html">Home</a></li>
+                <li><a href="./dashboard.html">All Products</a></li>
+                <li><a href="./electronics.html">Electronics</a></li>
+                <li><a href="./contact.html">Contact Us</a></li>
+                <li><a href="./about.html">About Us</a></li>
             </ul>
         </aside>
 
@@ -47,90 +49,8 @@
         <section class="main-content">
             <h2 style="margin-bottom: 2rem;">Electronics</h2>
             
-            <!-- Product Grid -->
-            <div class="product-grid">
-                <article class="product-card">
-                    <div class="discount-badge">20% OFF</div>
-                    <div class="wishlist">♥</div>
-                    <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="Wireless Headphones">
-                    <h3>Wireless Headphones</h3>
-                    <p>High-quality sound with noise cancellation.</p>
-                    <div class="price">
-                        <span class="original">₦15,000</span>
-                        <span class="discounted">₦12,000</span>
-                    </div>
-                    <div class="rating">★★★★★</div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </article>
-
-                <article class="product-card">
-                    <div class="discount-badge">15% OFF</div>
-                    <div class="wishlist">♥</div>
-                    <img src="./img/imgi_68_BEST-IPHONE-16-CASES-2048px-4833-2x1-1.jpg" alt="Smartphone Case">
-                    <h3>Smartphone Case</h3>
-                    <p>Durable protection for your device.</p>
-                    <div class="price">
-                        <span class="original">₦3,000</span>
-                        <span class="discounted">₦2,550</span>
-                    </div>
-                    <div class="rating">★★★★☆</div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </article>
-
-                <article class="product-card">
-                    <div class="discount-badge">30% OFF</div>
-                    <div class="wishlist">♥</div>
-                    <img src="./img/imgi_83_k-lYSkUcwk-3yX8av8w8Rg.c-r.jpg" alt="Laptop Stand">
-                    <h3>Laptop Stand</h3>
-                    <p>Ergonomic design for better posture.</p>
-                    <div class="price">
-                        <span class="original">₦10,000</span>
-                        <span class="discounted">₦7,000</span>
-                    </div>
-                    <div class="rating">★★★★★</div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </article>
-
-                <article class="product-card">
-                    <div class="discount-badge">10% OFF</div>
-                    <div class="wishlist">♥</div>
-                    <img src="./img/imgi_82_Rockerz_551_ANC_Pro.347_1.jpg" alt="USB-C Cable">
-                    <h3>USB-C Cable</h3>
-                    <p>Fast charging and data transfer.</p>
-                    <div class="price">
-                        <span class="original">₦2,500</span>
-                        <span class="discounted">₦2,250</span>
-                    </div>
-                    <div class="rating">★★★★☆</div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </article>
-
-                <article class="product-card">
-                    <div class="wishlist">♥</div>
-                    <img src="./img/imgi_68_BEST-IPHONE-16-CASES-2048px-4833-2x1-1.jpg" alt="Portable Speaker">
-                    <h3>Portable Speaker</h3>
-                    <p>Waterproof with powerful bass.</p>
-                    <div class="price">
-                        <span class="discounted">₦8,000</span>
-                    </div>
-                    <div class="rating">★★★★★</div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </article>
-
-                <article class="product-card">
-                    <div class="discount-badge">25% OFF</div>
-                    <div class="wishlist">♥</div>
-                    <img src="./img/imgi_83_k-lYSkUcwk-3yX8av8w8Rg.c-r.jpg" alt="Screen Protector">
-                    <h3>Screen Protector</h3>
-                    <p>Tempered glass for maximum protection.</p>
-                    <div class="price">
-                        <span class="original">₦4,000</span>
-                        <span class="discounted">₦3,000</span>
-                    </div>
-                    <div class="rating">★★★☆☆</div>
-                    <button class="add-to-cart">Add to Cart</button>
-                </article>
-            </div>
+            <div id="productStatus" class="product-status"></div>
+            <div class="product-grid" id="productGrid"></div>
         </section>
     </main>
 
@@ -172,5 +92,7 @@
             <p>&copy; 2026 Tiger Store. All rights reserved.</p>
         </div>
     </footer>
+    <script src="auth.js"></script>
+    <script src="products.js"></script>
 </body>
 </html>
