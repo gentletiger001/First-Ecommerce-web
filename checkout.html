@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Tiger Store</title>
+    <meta name="description" content="Complete your purchase at Tiger Store. Secure checkout with Paystack payment.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script>
+        (function () {
+            var currentUser = localStorage.getItem('currentUser');
+            var isAuthPage = ['login.html', 'signup.html'].indexOf(window.location.pathname.split('/').pop()) !== -1;
+            if (!isAuthPage && !currentUser) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+    <style>
+        /* ===== DESIGN TOKENS ===== */
+        :root {
+            --co-primary: #0066cc;
+            --co-primary-dark: #0052a3;
+            --co-primary-deeper: #003d7a;
+            --co-accent: #00b4d8;
+            --co-accent-light: #90e0ef;
+            --co-violet: #7b2ff7;
+            --co-violet-light: #c084fc;
+            --co-success: #10b981;
+            --co-success-light: #d1fae5;
+            --co-error: #ef4444;
+            --co-error-light: #fee2e2;
+            --co-surface: rgba(255, 255, 255, 0.72);
+            --co-surface-solid: #ffffff;
+            --co-text: #1a1a2e;
+            --co-text-muted: #64748b;
+            --co-border: rgba(0, 102, 204, 0.12);
+            --co-bg-gradient: linear-gradient(135deg, #0f0c29 0%, #0a1628 40%, #0d2137 100%);
+            --shadow-sm: 0 2px 8px rgba(0, 51, 153, 0.06);
+            --shadow-md: 0 8px 24px rgba(0, 51, 153, 0.1);
+            --shadow-lg: 0 20px 48px rgba(0, 51, 153, 0.15);
+            --shadow-glow: 0 0 30px rgba(0, 180, 216, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        /* ===== CHECKOUT PAGE OVERRIDES ===== */
+        .checkout-page {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--co-bg-gradient);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .checkout-page::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -30%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 180, 216, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatOrb 20s ease-in-out infinite;
+        }
+
+        .checkout-page::after {
+            content: '';
+            position: fixed;
+            bottom: -40%;
+            left: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(123, 47, 247, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatOrb 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(40px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* ===== STEP INDICATOR ===== */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            padding: 0 1rem;
+            animation: fadeSlideDown 0.6s ease-out;
+        }
+
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.35);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .step.active {
+            color: #ffffff;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet));
+            border-color: transparent;
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.4);
+            animation: stepPulse 2s ease-in-out infinite;
+        }
+
+        .step.completed {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .step.completed .step-number {
+            background: var(--co-success);
+            border-color: transparent;
+        }
+
+        .step.completed .step-number::after {
+            content: '✓';
+            font-size: 0.9rem;
+        }
+
+        .step.completed .step-number span {
+            display: none;
+        }
+
+        @keyframes stepPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 180, 216, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(0, 180, 216, 0.6); }
+        }
+
+        .step-connector {
+            width: 60px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .step-connector::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--co-accent), var(--co-violet));
+            transition: width 0.6s ease;
+        }
+
+        .step-connector.filled::after {
+            width: 100%;
+        }
+
+        /* ===== CHECKOUT LAYOUT ===== */
+        .checkout-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        .checkout-title {
+            text-align: center;
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, var(--co-accent-light) 50%, var(--co-violet-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeSlideDown 0.5s ease-out;
+        }
+
+        .checkout-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            animation: fadeSlideDown 0.6s ease-out 0.1s both;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* ===== GLASS CARD ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeSlideUp 0.7s ease-out both;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .glass-card:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .card-header-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+        }
+
+        .card-header h2 {
+            color: #ffffff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .card-header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        /* ===== FLOATING LABEL INPUTS ===== */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row.triple {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 1.2rem;
+            animation: fieldSlideIn 0.5s ease-out both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.15s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.25s; }
+        .form-group:nth-child(5) { animation-delay: 0.3s; }
+        .form-group:nth-child(6) { animation-delay: 0.35s; }
+
+        @keyframes fieldSlideIn {
+            from { opacity: 0; transform: translateX(-15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem 1rem 0.6rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+
+        .form-group select option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--co-accent);
+            background: rgba(255, 255, 255, 0.09);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.15), 0 0 20px rgba(0, 180, 216, 0.08);
+        }
+
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-color: var(--co-error);
+            animation: shakeField 0.4s ease-in-out;
+        }
+
+        .form-group input.valid,
+        .form-group select.valid {
+            border-color: var(--co-success);
+        }
+
+        @keyframes shakeField {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .floating-label {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            padding: 0 4px;
+        }
+
+        .form-group textarea ~ .floating-label {
+            top: 1rem;
+            transform: translateY(0);
+        }
+
+        .form-group input:focus ~ .floating-label,
+        .form-group input:not(:placeholder-shown) ~ .floating-label,
+        .form-group select:focus ~ .floating-label,
+        .form-group select:not([value=""]) ~ .floating-label,
+        .form-group .label-up,
+        .form-group textarea:focus ~ .floating-label,
+        .form-group textarea:not(:placeholder-shown) ~ .floating-label {
+            top: 2px;
+            left: 0.75rem;
+            font-size: 0.7rem;
+            color: var(--co-accent);
+            background: linear-gradient(180deg, rgba(15, 12, 41, 0.8) 50%, transparent 50%);
+        }
+
+        .field-error {
+            color: var(--co-error);
+            font-size: 0.75rem;
+            margin-top: 0.3rem;
+            min-height: 1rem;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.25s ease;
+        }
+
+        .field-error.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .field-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input.valid ~ .field-icon,
+        .form-group select.valid ~ .field-icon {
+            opacity: 1;
+            color: var(--co-success);
+        }
+
+        .form-group input.error ~ .field-icon,
+        .form-group select.error ~ .field-icon {
+            opacity: 1;
+            color: var(--co-error);
+        }
+
+        /* ===== ORDER SUMMARY ===== */
+        .summary-card {
+            position: sticky;
+            top: 120px;
+        }
+
+        .summary-items {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .summary-items::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .summary-items::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.04);
+            margin-bottom: 0.6rem;
+            transition: all 0.3s ease;
+            animation: itemFadeIn 0.4s ease-out both;
+        }
+
+        .summary-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        @keyframes itemFadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .summary-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .summary-item-name {
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .summary-item-qty {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.75rem;
+        }
+
+        .summary-item-price {
+            color: var(--co-accent-light);
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .summary-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+            margin: 1rem 0;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.45rem 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .summary-line span:last-child {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .summary-total-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0 0.5rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 0.5rem;
+        }
+
+        .summary-total-label {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .summary-total-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== PAY NOW BUTTON ===== */
+        .pay-btn {
+            width: 100%;
+            padding: 1.1rem 2rem;
+            border: none;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--co-accent) 0%, var(--co-violet) 100%);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .pay-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 180, 216, 0.35), 0 0 40px rgba(123, 47, 247, 0.15);
+        }
+
+        .pay-btn:hover::before {
+            left: 100%;
+        }
+
+        .pay-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .pay-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pay-btn .btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .pay-btn .lock-icon {
+            font-size: 1rem;
+        }
+
+        .pay-btn .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        .pay-btn.loading .btn-content {
+            display: none;
+        }
+
+        .pay-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.78rem;
+        }
+
+        .secure-badge svg {
+            width: 14px;
+            height: 14px;
+            fill: rgba(255, 255, 255, 0.35);
+        }
+
+        /* ===== EMPTY CART STATE ===== */
+        .empty-checkout {
+            text-align: center;
+            padding: 4rem 2rem;
+            animation: fadeSlideUp 0.6s ease-out;
+        }
+
+        .empty-checkout-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: emptyBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes emptyBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .empty-checkout h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-checkout p {
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .empty-checkout a {
+            display: inline-block;
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet));
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .empty-checkout a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 180, 216, 0.3);
+        }
+
+        /* ===== SUCCESS MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #0f1729 0%, #162033 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2.5rem;
+            text-align: center;
+            max-width: 460px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: modalSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 180, 216, 0.4), transparent);
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--co-success), #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            animation: checkmarkPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+        }
+
+        .success-checkmark::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            animation: checkRingPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes checkmarkPop {
+            from { transform: scale(0) rotate(-45deg); }
+            to { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes checkRingPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.5; }
+        }
+
+        .checkmark-svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .checkmark-svg path {
+            stroke: white;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: drawCheck 0.5s ease 0.6s forwards;
+        }
+
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .modal-title {
+            color: #ffffff;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .order-ref {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background: rgba(0, 180, 216, 0.1);
+            border: 1px solid rgba(0, 180, 216, 0.2);
+            border-radius: 8px;
+            color: var(--co-accent-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .modal-btn {
+            display: inline-block;
+            padding: 0.9rem 2.5rem;
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet));
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 180, 216, 0.3);
+        }
+
+        /* Confetti Particles */
+        .confetti-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            top: 0;
+            animation: confettiFall 3s ease-in-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg) scale(0); opacity: 1; }
+            10% { transform: translateY(0) rotate(45deg) scale(1); opacity: 1; }
+            100% { transform: translateY(400px) rotate(720deg) scale(0.3); opacity: 0; }
+        }
+
+        /* ===== TOAST NOTIFICATION ===== */
+        .toast {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 10000;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 350px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: rgba(239, 68, 68, 0.9);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .toast.warning {
+            background: rgba(245, 158, 11, 0.9);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+        }
+
+        .toast.info {
+            background: rgba(0, 180, 216, 0.9);
+            border: 1px solid rgba(0, 180, 216, 0.5);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                position: relative;
+                top: 0;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row.triple {
+                grid-template-columns: 1fr;
+            }
+
+            .step span:not(.step-number) {
+                display: none;
+            }
+
+            .step-connector {
+                width: 30px;
+            }
+
+            .checkout-title {
+                font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .modal-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .checkout-wrapper {
+                padding: 1.5rem 1rem 3rem;
+            }
+        }
+    </style>
+</head>
+<body class="checkout-page" data-page="checkout">
+    <!-- Header / Navbar -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1><a href="index.html" class="logo-link">Tiger store</a></h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>Search</button>
+            </div>
+            <div class="header-actions">
+                <a href="profile.html" class="header-link">Profile</a>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+                <div class="cart">
+                    <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
+                    <span class="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="electronics.html">Electronics</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="about.html">About Us</a>
+        </nav>
+    </header>
+
+    <!-- Checkout Content -->
+    <div class="checkout-wrapper">
+        <h1 class="checkout-title">Secure Checkout</h1>
+        <p class="checkout-subtitle">Complete your order in just a few steps</p>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-number"><span>1</span></div>
+                <span>Shipping</span>
+            </div>
+            <div class="step-connector" id="connector1"></div>
+            <div class="step" id="step2">
+                <div class="step-number"><span>2</span></div>
+                <span>Payment</span>
+            </div>
+            <div class="step-connector" id="connector2"></div>
+            <div class="step" id="step3">
+                <div class="step-number"><span>3</span></div>
+                <span>Confirmation</span>
+            </div>
+        </div>
+
+        <!-- Main Content: will be replaced if cart is empty -->
+        <div id="checkoutContent">
+            <div class="checkout-grid">
+                <!-- Shipping Address Form -->
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-header-icon">📦</div>
+                        <div>
+                            <h2>Shipping Address</h2>
+                            <p>Where should we deliver your order?</p>
+                        </div>
+                    </div>
+
+                    <form id="shippingForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="shipFullName" placeholder=" " required>
+                                <label class="floating-label" for="shipFullName">Full Name *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorFullName"></div>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="shipEmail" placeholder=" " required>
+                                <label class="floating-label" for="shipEmail">Email Address *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorEmail"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="tel" id="shipPhone" placeholder=" " required>
+                                <label class="floating-label" for="shipPhone">Phone Number *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorPhone"></div>
+                            </div>
+                            <div class="form-group">
+                                <select id="shipCountry" required>
+                                    <option value="" disabled selected></option>
+                                    <option value="NG">Nigeria</option>
+                                    <option value="GH">Ghana</option>
+                                    <option value="KE">Kenya</option>
+                                    <option value="ZA">South Africa</option>
+                                    <option value="US">United States</option>
+                                    <option value="GB">United Kingdom</option>
+                                    <option value="CA">Canada</option>
+                                </select>
+                                <label class="floating-label label-up" for="shipCountry">Country *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorCountry"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" id="shipAddress" placeholder=" " required>
+                            <label class="floating-label" for="shipAddress">Street Address *</label>
+                            <span class="field-icon">✓</span>
+                            <div class="field-error" id="errorAddress"></div>
+                        </div>
+
+                        <div class="form-row triple">
+                            <div class="form-group">
+                                <input type="text" id="shipCity" placeholder=" " required>
+                                <label class="floating-label" for="shipCity">City *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorCity"></div>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="shipState" placeholder=" " required>
+                                <label class="floating-label" for="shipState">State *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorState"></div>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="shipZip" placeholder=" " required>
+                                <label class="floating-label" for="shipZip">Zip Code *</label>
+                                <span class="field-icon">✓</span>
+                                <div class="field-error" id="errorZip"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <textarea id="shipNotes" placeholder=" " rows="3"></textarea>
+                            <label class="floating-label" for="shipNotes">Delivery Notes (optional)</label>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="glass-card summary-card">
+                    <div class="card-header">
+                        <div class="card-header-icon">🛍️</div>
+                        <div>
+                            <h2>Order Summary</h2>
+                            <p id="itemCountText">0 items</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-items" id="summaryItems"></div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-line">
+                        <span>Subtotal</span>
+                        <span id="coSubtotal">₦0</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Shipping</span>
+                        <span id="coShipping">₦1,000</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Tax (10%)</span>
+                        <span id="coTax">₦0</span>
+                    </div>
+
+                    <div class="summary-total-line">
+                        <span class="summary-total-label">Total</span>
+                        <span class="summary-total-amount" id="coTotal">₦0</span>
+                    </div>
+
+                    <button class="pay-btn" id="payBtn" type="button">
+                        <div class="btn-content">
+                            <span class="lock-icon">🔒</span>
+                            <span>Pay Now</span>
+                        </div>
+                        <div class="spinner"></div>
+                    </button>
+
+                    <div class="secure-badge">
+                        <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/></svg>
+                        <span>Secured by Paystack · 256-bit SSL encryption</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content">
+            <div class="confetti-container" id="confettiContainer"></div>
+            <div class="success-checkmark">
+                <svg class="checkmark-svg" viewBox="0 0 36 36">
+                    <path d="M6 18L15 27L30 9"/>
+                </svg>
+            </div>
+            <h2 class="modal-title">Payment Successful! 🎉</h2>
+            <p class="modal-subtitle">Your order has been placed and is being processed. You'll receive a confirmation email shortly.</p>
+            <div class="order-ref" id="orderRef">ORDER #TGR-000000</div>
+            <br><br>
+            <a href="index.html" class="modal-btn">Continue Shopping</a>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Tiger Store provides quality electronics and accessories at competitive prices.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="products.html">Products</a>
+                <a href="contact.html">Contact</a>
+                <a href="about.html">About</a>
+            </div>
+            <div class="footer-section">
+                <h4>Customer Service</h4>
+                <a href="#">Help Center</a>
+                <a href="#">Shipping Info</a>
+                <a href="#">Returns</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Info</h4>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Email: info@tigerstore.com</p>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Phone: +234 802 000 1234</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+                <a href="#">Instagram</a>
+                <a href="#">LinkedIn</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Tiger Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        // ===== HELPERS =====
+        function formatCurrency(amount) {
+            return '₦' + Number(amount).toLocaleString();
+        }
+
+        function generateOrderRef() {
+            var ts = Date.now().toString(36).toUpperCase();
+            var rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return 'TGR-' + ts.slice(-4) + rand;
+        }
+
+        // ===== TOAST =====
+        function showToast(message, type) {
+            var toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + (type || 'info');
+            setTimeout(function () { toast.classList.add('show'); }, 10);
+            setTimeout(function () { toast.classList.remove('show'); }, 4000);
+        }
+
+        // ===== CONFETTI =====
+        function spawnConfetti() {
+            var container = document.getElementById('confettiContainer');
+            var colors = ['#00b4d8', '#7b2ff7', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4'];
+            for (var i = 0; i < 50; i++) {
+                (function (index) {
+                    setTimeout(function () {
+                        var el = document.createElement('div');
+                        el.className = 'confetti';
+                        el.style.left = Math.random() * 100 + '%';
+                        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        el.style.animationDelay = (Math.random() * 0.5) + 's';
+                        el.style.animationDuration = (2 + Math.random() * 2) + 's';
+                        el.style.width = (5 + Math.random() * 8) + 'px';
+                        el.style.height = (5 + Math.random() * 8) + 'px';
+                        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                        container.appendChild(el);
+                    }, index * 30);
+                })(i);
+            }
+        }
+
+        // ===== STEP INDICATOR =====
+        function setStep(stepNumber) {
+            var steps = [
+                document.getElementById('step1'),
+                document.getElementById('step2'),
+                document.getElementById('step3')
+            ];
+            var connectors = [
+                document.getElementById('connector1'),
+                document.getElementById('connector2')
+            ];
+
+            steps.forEach(function (step, idx) {
+                step.classList.remove('active', 'completed');
+                if (idx + 1 < stepNumber) {
+                    step.classList.add('completed');
+                } else if (idx + 1 === stepNumber) {
+                    step.classList.add('active');
+                }
+            });
+
+            connectors.forEach(function (conn, idx) {
+                if (idx + 1 < stepNumber) {
+                    conn.classList.add('filled');
+                } else {
+                    conn.classList.remove('filled');
+                }
+            });
+        }
+
+        // ===== RENDER ORDER SUMMARY =====
+        function renderCheckoutSummary() {
+            var currentUser = window.tigerAuth.getCurrentUser();
+            if (!currentUser) {
+                window.location.replace('login.html');
+                return null;
+            }
+
+            var items = currentUser.cart || [];
+
+            if (!items.length) {
+                document.getElementById('checkoutContent').innerHTML =
+                    '<div class="glass-card empty-checkout">' +
+                    '<div class="empty-checkout-icon">🛒</div>' +
+                    '<h2>Your cart is empty</h2>' +
+                    '<p>Add some items to your cart before checking out.</p>' +
+                    '<a href="products.html">Browse Products</a>' +
+                    '</div>';
+                return null;
+            }
+
+            var summaryContainer = document.getElementById('summaryItems');
+            var itemCountText = document.getElementById('itemCountText');
+
+            var totalQty = items.reduce(function (sum, item) {
+                return sum + Number(item.quantity || 0);
+            }, 0);
+            itemCountText.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
+
+            summaryContainer.innerHTML = items.map(function (item, index) {
+                var lineTotal = Number(item.price || 0) * Number(item.quantity || 0);
+                return '<div class="summary-item" style="animation-delay:' + (index * 0.08) + 's">' +
+                    (item.image ? '<img src="' + item.image + '" alt="' + item.name + '">' : '') +
+                    '<div class="summary-item-info">' +
+                    '<div class="summary-item-name">' + item.name + '</div>' +
+                    '<div class="summary-item-qty">Qty: ' + item.quantity + '</div>' +
+                    '</div>' +
+                    '<div class="summary-item-price">' + formatCurrency(lineTotal) + '</div>' +
+                    '</div>';
+            }).join('');
+
+            var subtotal = items.reduce(function (sum, item) {
+                return sum + Number(item.price || 0) * Number(item.quantity || 0);
+            }, 0);
+            var shipping = 1000;
+            var tax = Math.round(subtotal * 0.1);
+            var total = subtotal + shipping + tax;
+
+            document.getElementById('coSubtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('coShipping').textContent = formatCurrency(shipping);
+            document.getElementById('coTax').textContent = formatCurrency(tax);
+            document.getElementById('coTotal').textContent = formatCurrency(total);
+
+            // Pre-fill email from user profile
+            var emailField = document.getElementById('shipEmail');
+            if (emailField && currentUser.email) {
+                emailField.value = currentUser.email;
+            }
+
+            // Pre-fill name from user profile
+            var nameField = document.getElementById('shipFullName');
+            if (nameField && currentUser.fullName) {
+                nameField.value = currentUser.fullName;
+            }
+
+            return { subtotal: subtotal, shipping: shipping, tax: tax, total: total };
+        }
+
+        // ===== FORM VALIDATION =====
+        function validateField(id, errorId, validationFn) {
+            var field = document.getElementById(id);
+            var errorEl = document.getElementById(errorId);
+            var value = field.value.trim();
+            var result = validationFn(value);
+
+            if (result === true) {
+                field.classList.remove('error');
+                field.classList.add('valid');
+                if (errorEl) {
+                    errorEl.textContent = '';
+                    errorEl.classList.remove('show');
+                }
+                return true;
+            } else {
+                field.classList.remove('valid');
+                field.classList.add('error');
+                if (errorEl) {
+                    errorEl.textContent = result;
+                    errorEl.classList.add('show');
+                }
+                return false;
+            }
+        }
+
+        function validateAllFields() {
+            var allValid = true;
+
+            var checks = [
+                {
+                    id: 'shipFullName', errorId: 'errorFullName',
+                    fn: function (v) { return v.length >= 2 ? true : 'Please enter your full name'; }
+                },
+                {
+                    id: 'shipEmail', errorId: 'errorEmail',
+                    fn: function (v) {
+                        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        return emailRegex.test(v) ? true : 'Please enter a valid email address';
+                    }
+                },
+                {
+                    id: 'shipPhone', errorId: 'errorPhone',
+                    fn: function (v) {
+                        var phoneRegex = /^[\+]?[0-9\s\-\(\)]{7,15}$/;
+                        return phoneRegex.test(v) ? true : 'Please enter a valid phone number';
+                    }
+                },
+                {
+                    id: 'shipCountry', errorId: 'errorCountry',
+                    fn: function (v) { return v ? true : 'Please select a country'; }
+                },
+                {
+                    id: 'shipAddress', errorId: 'errorAddress',
+                    fn: function (v) { return v.length >= 5 ? true : 'Please enter your street address'; }
+                },
+                {
+                    id: 'shipCity', errorId: 'errorCity',
+                    fn: function (v) { return v.length >= 2 ? true : 'Please enter your city'; }
+                },
+                {
+                    id: 'shipState', errorId: 'errorState',
+                    fn: function (v) { return v.length >= 2 ? true : 'Please enter your state'; }
+                },
+                {
+                    id: 'shipZip', errorId: 'errorZip',
+                    fn: function (v) { return v.length >= 3 ? true : 'Please enter a valid zip code'; }
+                }
+            ];
+
+            checks.forEach(function (check) {
+                var isValid = validateField(check.id, check.errorId, check.fn);
+                if (!isValid) {
+                    allValid = false;
+                }
+            });
+
+            return allValid;
+        }
+
+        // ===== LIVE VALIDATION ON BLUR =====
+        function setupLiveValidation() {
+            var fields = [
+                { id: 'shipFullName', errorId: 'errorFullName', fn: function (v) { return v.length >= 2 ? true : 'Please enter your full name'; } },
+                { id: 'shipEmail', errorId: 'errorEmail', fn: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? true : 'Please enter a valid email address'; } },
+                { id: 'shipPhone', errorId: 'errorPhone', fn: function (v) { return /^[\+]?[0-9\s\-\(\)]{7,15}$/.test(v) ? true : 'Please enter a valid phone number'; } },
+                { id: 'shipCountry', errorId: 'errorCountry', fn: function (v) { return v ? true : 'Please select a country'; } },
+                { id: 'shipAddress', errorId: 'errorAddress', fn: function (v) { return v.length >= 5 ? true : 'Please enter your street address'; } },
+                { id: 'shipCity', errorId: 'errorCity', fn: function (v) { return v.length >= 2 ? true : 'Please enter your city'; } },
+                { id: 'shipState', errorId: 'errorState', fn: function (v) { return v.length >= 2 ? true : 'Please enter your state'; } },
+                { id: 'shipZip', errorId: 'errorZip', fn: function (v) { return v.length >= 3 ? true : 'Please enter a valid zip code'; } }
+            ];
+
+            fields.forEach(function (f) {
+                var el = document.getElementById(f.id);
+                if (el) {
+                    el.addEventListener('blur', function () {
+                        if (el.value.trim()) {
+                            validateField(f.id, f.errorId, f.fn);
+                        }
+                    });
+                    el.addEventListener('input', function () {
+                        if (el.classList.contains('error')) {
+                            validateField(f.id, f.errorId, f.fn);
+                        }
+                    });
+                }
+            });
+        }
+
+        // ===== PAYSTACK PAYMENT =====
+        function initiatePayment(email, amountInKobo, onSuccess) {
+            // IMPORTANT: Replace 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' with your actual Paystack public key
+            var handler = PaystackPop.setup({
+                key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+                email: email,
+                amount: amountInKobo,
+                currency: 'NGN',
+                ref: 'TGR_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+                metadata: {
+                    custom_fields: [
+                        {
+                            display_name: 'Customer Name',
+                            variable_name: 'customer_name',
+                            value: document.getElementById('shipFullName').value.trim()
+                        },
+                        {
+                            display_name: 'Delivery Address',
+                            variable_name: 'delivery_address',
+                            value: document.getElementById('shipAddress').value.trim() + ', ' +
+                                document.getElementById('shipCity').value.trim() + ', ' +
+                                document.getElementById('shipState').value.trim()
+                        }
+                    ]
+                },
+                callback: function (response) {
+                    onSuccess(response.reference);
+                },
+                onClose: function () {
+                    var payBtn = document.getElementById('payBtn');
+                    payBtn.classList.remove('loading');
+                    payBtn.disabled = false;
+                    showToast('Payment was cancelled. Your cart is still saved.', 'warning');
+                    setStep(1);
+                }
+            });
+            handler.openIframe();
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', function () {
+            // Logout handler
+            var logoutButton = document.getElementById('logoutBtn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function () {
+                    window.tigerAuth.logout();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            // Cart badge
+            window.tigerAuth.updateCartBadge();
+
+            // Render summary
+            var totals = renderCheckoutSummary();
+
+            // If cart was empty, stop here
+            if (!totals) return;
+
+            // Setup live validation
+            setupLiveValidation();
+
+            // Pay button handler
+            var payBtn = document.getElementById('payBtn');
+            payBtn.addEventListener('click', function () {
+                // Validate form
+                if (!validateAllFields()) {
+                    showToast('Please fill in all required shipping fields.', 'error');
+                    // Scroll to first error
+                    var firstError = document.querySelector('.form-group input.error, .form-group select.error');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstError.focus();
+                    }
+                    return;
+                }
+
+                // Move to payment step
+                setStep(2);
+
+                // Loading state
+                payBtn.classList.add('loading');
+                payBtn.disabled = true;
+
+                var email = document.getElementById('shipEmail').value.trim();
+                var amountInKobo = totals.total * 100;
+
+                // Slight delay for visual feedback
+                setTimeout(function () {
+                    initiatePayment(email, amountInKobo, function (reference) {
+                        // Payment succeeded!
+                        payBtn.classList.remove('loading');
+                        setStep(3);
+
+                        // Clear the cart
+                        var currentUser = window.tigerAuth.getCurrentUser();
+                        if (currentUser) {
+                            currentUser.cart = [];
+                            window.tigerAuth.saveCurrentUser(currentUser);
+                            window.tigerAuth.updateCartBadge();
+                        }
+
+                        // Show success modal
+                        var orderRef = generateOrderRef();
+                        document.getElementById('orderRef').textContent = 'ORDER #' + orderRef;
+                        document.getElementById('successModal').classList.add('show');
+                        spawnConfetti();
+                    });
+                }, 400);
+            });
+        });
+    </script>
+</body>
+</html>

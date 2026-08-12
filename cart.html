@@ -124,17 +124,46 @@
             background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 1rem;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.3px;
+        }
+
+        .checkout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
         }
 
         .checkout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 102, 204, 0.35);
+        }
+
+        .checkout-btn:hover::before {
+            left: 100%;
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .checkout-btn:disabled::before {
+            display: none;
         }
 
         .empty-cart {
@@ -290,9 +319,17 @@
             const tax = Math.round(subtotal * 0.1);
             const total = subtotal + shipping + tax;
 
+            const checkoutBtn = document.querySelector('.checkout-btn');
+
             if (!items.length) {
                 cartItems.innerHTML = '<div class="empty-cart"><p>Your cart is empty.</p><a href="index.html" class="continue-shopping">Continue Shopping</a></div>';
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = true;
+                }
             } else {
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = false;
+                }
                 cartItems.innerHTML = items.map(function (item) {
                     const itemSubtotal = Number(item.price || 0) * Number(item.quantity || 0);
                     return '<div class="cart-item">' +
@@ -326,6 +363,16 @@
                 });
             }
             renderCart();
+
+            const checkoutBtn = document.querySelector('.checkout-btn');
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', function () {
+                    const currentUser = window.tigerAuth.getCurrentUser();
+                    if (currentUser && currentUser.cart && currentUser.cart.length > 0) {
+                        window.location.href = 'checkout.html';
+                    }
+                });
+            }
         });
 
         document.addEventListener('click', function (event) {
