@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking & History - Tiger Store</title>
+    <meta name="description" content="Track your order status live, view purchase history, and download receipts at Tiger Store.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            var currentUser = localStorage.getItem('currentUser');
+            var isAuthPage = ['login.html', 'signup.html'].indexOf(window.location.pathname.split('/').pop()) !== -1;
+            if (!isAuthPage && !currentUser) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --co-primary: #0066cc;
+            --co-accent: #00b4d8;
+            --co-accent-light: #90e0ef;
+            --co-violet: #7b2ff7;
+            --co-violet-light: #c084fc;
+            --co-success: #10b981;
+            --co-warning: #f59e0b;
+            --co-surface: rgba(255, 255, 255, 0.06);
+            --co-border: rgba(255, 255, 255, 0.12);
+            --co-bg-gradient: linear-gradient(135deg, #0f0c29 0%, #0a1628 40%, #0d2137 100%);
+            --radius-md: 14px;
+            --radius-lg: 20px;
+        }
+
+        body.orders-page {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--co-bg-gradient);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .orders-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 5rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, var(--co-accent-light) 50%, var(--co-violet-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+
+        /* Search & Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 260px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--co-border);
+            border-radius: var(--radius-md);
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--co-accent);
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.1rem;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.3rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--co-border);
+        }
+
+        .filter-tab {
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet));
+            color: #ffffff;
+        }
+
+        /* Order Cards */
+        .order-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--co-border);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-card:hover {
+            border-color: rgba(0, 180, 216, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .order-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .order-id-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .order-id {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--co-accent-light);
+            letter-spacing: 0.5px;
+        }
+
+        .order-date {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.82rem;
+        }
+
+        .status-pill {
+            padding: 0.4rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .status-pill.Processing {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-pill.Shipped {
+            background: rgba(0, 180, 216, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(0, 180, 216, 0.3);
+        }
+
+        .status-pill.Out-for-Delivery {
+            background: rgba(192, 132, 252, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(192, 132, 252, 0.3);
+        }
+
+        .status-pill.Completed, .status-pill.Delivered {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* TRACKING TIMELINE */
+        .timeline-container {
+            margin: 2rem 0;
+            padding: 1rem 0;
+        }
+
+        .timeline-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timeline-steps {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            position: relative;
+            gap: 0.5rem;
+        }
+
+        .timeline-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .timeline-progress-bar {
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--co-accent), var(--co-violet), var(--co-success));
+            z-index: 1;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-node {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            transition: all 0.4s ease;
+        }
+
+        .timeline-step.completed .timeline-node {
+            background: var(--co-success);
+            border-color: var(--co-success);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            color: #ffffff;
+        }
+
+        .timeline-step.active .timeline-node {
+            background: linear-gradient(135deg, var(--co-accent), var(--co-violet));
+            border-color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 180, 216, 0.6);
+            animation: nodePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes nodePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 180, 216, 0.6); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(0, 180, 216, 0.8); }
+        }
+
+        .timeline-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 0.2rem;
+        }
+
+        .timeline-step.completed .timeline-label,
+        .timeline-step.active .timeline-label {
+            color: #ffffff;
+        }
+
+        .timeline-time {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .timeline-desc {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 0.3rem;
+            max-width: 120px;
+        }
+
+        /* Order Items Table / Grid */
+        .order-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .order-item-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.8rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .order-item-mini img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .order-item-mini-info h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .order-item-mini-info p {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Card Footer Actions */
+        .order-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .total-paid {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .total-paid span {
+            color: var(--co-accent-light);
+            font-weight: 800;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-receipt {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-receipt:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-received {
+            background: linear-gradient(135deg, var(--co-success), #059669);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-received:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-demo-stage {
+            background: rgba(123, 47, 247, 0.15);
+            color: var(--co-violet-light);
+            border: 1px dashed var(--co-violet-light);
+        }
+
+        .btn-demo-stage:hover {
+            background: rgba(123, 47, 247, 0.3);
+        }
+
+        /* PRINTABLE INVOICE MODAL */
+        .invoice-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .invoice-modal-overlay.show {
+            display: flex;
+        }
+
+        .invoice-paper {
+            background: #ffffff;
+            color: #1a1a2e;
+            max-width: 680px;
+            width: 100%;
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e8ecf5;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .invoice-brand h2 {
+            color: #0066cc;
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .invoice-brand p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta h3 {
+            font-size: 1.2rem;
+            color: #003d7a;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .invoice-table th {
+            background: #f8faff;
+            color: #003d7a;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            border-bottom: 2px solid #e8ecf5;
+        }
+
+        .invoice-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid #e8ecf5;
+            font-size: 0.9rem;
+        }
+
+        .invoice-totals {
+            width: 250px;
+            margin-left: auto;
+            margin-top: 1rem;
+        }
+
+        .invoice-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+        }
+
+        .invoice-line.grand-total {
+            border-top: 2px solid #0066cc;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0066cc;
+            margin-top: 0.5rem;
+            padding-top: 0.6rem;
+        }
+
+        .invoice-print-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e8ecf5;
+        }
+
+        .btn-print {
+            background: #0066cc;
+            color: #ffffff;
+            padding: 0.75rem 1.8rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-close-invoice {
+            background: #e8ecf5;
+            color: #1a1a2e;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .invoice-paper, .invoice-paper * {
+                visibility: visible;
+            }
+            .invoice-paper {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+            .invoice-print-actions {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .timeline-steps {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                text-align: left;
+            }
+
+            .timeline-steps::before, .timeline-progress-bar {
+                display: none;
+            }
+
+            .timeline-step {
+                flex-direction: row;
+                text-align: left;
+                gap: 1rem;
+            }
+
+            .timeline-desc {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="orders-page">
+    <!-- Header / Navbar -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1><a href="index.html" class="logo-link">Tiger store</a></h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>Search</button>
+            </div>
+            <div class="header-actions">
+                <a href="wishlist.html" class="header-link">Wishlist (<span class="wishlist-count">0</span>)</a>
+                <a href="profile.html" class="header-link">Profile</a>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+                <div class="cart">
+                    <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
+                    <span class="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="electronics.html">Electronics</a>
+            <a href="orders.html" class="active">My Orders</a>
+            <a href="wishlist.html">Wishlist</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="about.html">About Us</a>
+        </nav>
+    </header>
+
+    <div class="orders-wrapper">
+        <div class="page-header">
+            <h1>Order Tracking & History</h1>
+            <p>Track your package status live from warehouse to your doorstep</p>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="filter-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="orderSearchInput" placeholder="Search by Order ID (e.g. TGR-89A1B2) or product...">
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All Orders</button>
+                <button class="filter-tab" data-filter="active">Active</button>
+                <button class="filter-tab" data-filter="completed">Completed</button>
+            </div>
+        </div>
+
+        <!-- Order Cards List -->
+        <div id="ordersContainer"></div>
+    </div>
+
+    <!-- Printable Invoice Modal -->
+    <div class="invoice-modal-overlay" id="invoiceModal">
+        <div class="invoice-paper" id="invoicePaper"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Tiger Store provides quality electronics and accessories at competitive prices.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="products.html">Products</a>
+                <a href="orders.html">My Orders</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <div class="footer-section">
+                <h4>Customer Service</h4>
+                <a href="#">Help Center</a>
+                <a href="#">Shipping Info</a>
+                <a href="#">Returns</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Info</h4>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Email: info@tigerstore.com</p>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Phone: +234 802 000 1234</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+                <a href="#">Instagram</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Tiger Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        function formatCurrency(amount) {
+            return '₦' + Number(amount).toLocaleString();
+        }
+
+        function renderOrders(filterCategory, searchQuery) {
+            var ordersContainer = document.getElementById('ordersContainer');
+            var orders = window.tigerAuth.getOrders();
+
+            if (!orders || !orders.length) {
+                ordersContainer.innerHTML =
+                    '<div class="order-card" style="text-align: center; padding: 4rem 2rem;">' +
+                    '<div style="font-size: 3.5rem; margin-bottom: 1rem;">📦</div>' +
+                    '<h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No Orders Yet</h2>' +
+                    '<p style="color: rgba(255, 255, 255, 0.5); margin-bottom: 2rem;">Place your first order using our Paystack secure checkout!</p>' +
+                    '<a href="products.html" style="display: inline-block; padding: 0.85rem 2rem; background: linear-gradient(135deg, #00b4d8, #7b2ff7); color: white; border-radius: 12px; text-decoration: none; font-weight: 700;">Start Shopping</a>' +
+                    '</div>';
+                return;
+            }
+
+            filterCategory = filterCategory || 'all';
+            searchQuery = (searchQuery || '').toLowerCase().trim();
+
+            var filtered = orders.filter(function (order) {
+                var matchesFilter = true;
+                if (filterCategory === 'active') {
+                    matchesFilter = order.status !== 'Completed';
+                } else if (filterCategory === 'completed') {
+                    matchesFilter = order.status === 'Completed';
+                }
+
+                var matchesSearch = true;
+                if (searchQuery) {
+                    var inId = order.id.toLowerCase().indexOf(searchQuery) !== -1;
+                    var inItems = (order.items || []).some(function (item) {
+                        return item.name.toLowerCase().indexOf(searchQuery) !== -1;
+                    });
+                    matchesSearch = inId || inItems;
+                }
+
+                return matchesFilter && matchesSearch;
+            });
+
+            if (!filtered.length) {
+                ordersContainer.innerHTML = '<div class="order-card" style="text-align: center; padding: 3rem;"><p style="color: rgba(255, 255, 255, 0.5);">No orders matching your search or filter.</p></div>';
+                return;
+            }
+
+            ordersContainer.innerHTML = filtered.map(function (order) {
+                var stageIndex = order.currentStageIndex || 0;
+                var progressPercent = (stageIndex / 4) * 80;
+
+                var icons = ['💳', '📦', '🚚', '🛵', '🎉'];
+
+                var timelineHtml = order.stages.map(function (stage, idx) {
+                    var statusClass = '';
+                    if (idx < stageIndex) statusClass = 'completed';
+                    else if (idx === stageIndex) statusClass = 'active';
+
+                    return '<div class="timeline-step ' + statusClass + '">' +
+                        '<div class="timeline-node">' + (idx < stageIndex ? '✓' : icons[idx]) + '</div>' +
+                        '<div class="timeline-label">' + stage.label + '</div>' +
+                        '<div class="timeline-time">' + stage.time + '</div>' +
+                        '<div class="timeline-desc">' + stage.desc + '</div>' +
+                        '</div>';
+                }).join('');
+
+                var itemsHtml = (order.items || []).map(function (item) {
+                    return '<div class="order-item-mini">' +
+                        (item.image ? '<img src="' + item.image + '" alt="' + item.name + '">' : '') +
+                        '<div class="order-item-mini-info">' +
+                        '<h4>' + item.name + '</h4>' +
+                        '<p>Qty: ' + item.quantity + ' × ' + formatCurrency(item.price) + '</p>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
+
+                var isCompleted = order.status === 'Completed';
+
+                return '<div class="order-card" data-order-id="' + order.id + '">' +
+                    '<div class="order-card-header">' +
+                    '<div class="order-id-badge">' +
+                    '<div>' +
+                    '<div class="order-id">' + order.id + '</div>' +
+                    '<div class="order-date">Placed on ' + order.displayDate + ' · Paystack Ref: ' + (order.paymentRef || 'N/A') + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="status-pill ' + order.status.replace(/\s+/g, '-') + '">' +
+                    '<span>●</span> ' + (isCompleted ? 'Delivered & Received' : order.status) +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="timeline-container">' +
+                    '<div class="timeline-title">Live Delivery Status Timeline</div>' +
+                    '<div class="timeline-steps">' +
+                    '<div class="timeline-progress-bar" style="width: ' + progressPercent + '%;"></div>' +
+                    timelineHtml +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="order-items-grid">' + itemsHtml + '</div>' +
+                    '<div class="order-card-actions">' +
+                    '<div class="total-paid">Total Paid: <span>' + formatCurrency(order.pricing.total || 0) + '</span></div>' +
+                    '<div class="btn-group">' +
+                    '<button class="btn-action btn-receipt" onclick="openInvoice(\'' + order.id + '\')">📄 Print Invoice</button>' +
+                    (!isCompleted ? '<button class="btn-action btn-demo-stage" onclick="advanceStage(\'' + order.id + '\')">⚡ Simulate Next Stage</button>' : '') +
+                    (!isCompleted ? '<button class="btn-action btn-received" onclick="markCompleted(\'' + order.id + '\')">✓ Mark as Received & Complete</button>' : '<span style="color: #34d399; font-weight: 700; font-size: 0.9rem;">✓ Order Completed</span>') +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        function advanceStage(orderId) {
+            var orders = window.tigerAuth.getOrders();
+            var order = orders.find(function (o) { return o.id === orderId; });
+            if (order) {
+                var nextIndex = (order.currentStageIndex || 0) + 1;
+                window.tigerAuth.updateOrderStatus(orderId, nextIndex);
+                renderOrders(document.querySelector('.filter-tab.active').getAttribute('data-filter'), document.getElementById('orderSearchInput').value);
+            }
+        }
+
+        function markCompleted(orderId) {
+            window.tigerAuth.updateOrderStatus(orderId, 4); // 4 = Completed
+            renderOrders(document.querySelector('.filter-tab.active').getAttribute('data-filter'), document.getElementById('orderSearchInput').value);
+        }
+
+        function openInvoice(orderId) {
+            var orders = window.tigerAuth.getOrders();
+            var order = orders.find(function (o) { return o.id === orderId; });
+            if (!order) return;
+
+            var shipping = order.shipping || {};
+            var pricing = order.pricing || {};
+
+            var itemsRows = (order.items || []).map(function (item) {
+                return '<tr>' +
+                    '<td>' + item.name + '</td>' +
+                    '<td>' + item.quantity + '</td>' +
+                    '<td>' + formatCurrency(item.price) + '</td>' +
+                    '<td>' + formatCurrency(item.price * item.quantity) + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            var paper = document.getElementById('invoicePaper');
+            paper.innerHTML =
+                '<div class="invoice-header">' +
+                '<div class="invoice-brand">' +
+                '<h2>Tiger Store</h2>' +
+                '<p>Official Purchase Receipt</p>' +
+                '</div>' +
+                '<div class="invoice-meta">' +
+                '<h3>INVOICE</h3>' +
+                '<p><strong>Invoice #:</strong> ' + order.id + '</p>' +
+                '<p><strong>Date:</strong> ' + order.displayDate + '</p>' +
+                '<p><strong>Payment Ref:</strong> ' + (order.paymentRef || 'N/A') + '</p>' +
+                '</div>' +
+                '</div>' +
+                '<div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.9rem;">' +
+                '<div>' +
+                '<strong style="color: #003d7a;">Billed To:</strong><br>' +
+                (shipping.fullName || 'Customer') + '<br>' +
+                (shipping.email || '') + '<br>' +
+                (shipping.phone || '') +
+                '</div>' +
+                '<div style="text-align: right;">' +
+                '<strong style="color: #003d7a;">Shipping Address:</strong><br>' +
+                (shipping.address || '') + '<br>' +
+                (shipping.city || '') + ', ' + (shipping.state || '') + '<br>' +
+                (shipping.country || 'Nigeria') +
+                '</div>' +
+                '</div>' +
+                '<table class="invoice-table">' +
+                '<thead><tr><th>Item Description</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>' +
+                '<tbody>' + itemsRows + '</tbody>' +
+                '</table>' +
+                '<div class="invoice-totals">' +
+                '<div class="invoice-line"><span>Subtotal:</span><span>' + formatCurrency(pricing.subtotal || 0) + '</span></div>' +
+                '<div class="invoice-line"><span>Shipping Fee:</span><span>' + formatCurrency(pricing.shipping || 1000) + '</span></div>' +
+                '<div class="invoice-line"><span>Tax (10%):</span><span>' + formatCurrency(pricing.tax || 0) + '</span></div>' +
+                '<div class="invoice-line grand-total"><span>Grand Total:</span><span>' + formatCurrency(pricing.total || 0) + '</span></div>' +
+                '</div>' +
+                '<div class="invoice-print-actions">' +
+                '<button class="btn-close-invoice" onclick="closeInvoice()">Close</button>' +
+                '<button class="btn-print" onclick="window.print()">Print / Download PDF</button>' +
+                '</div>';
+
+            document.getElementById('invoiceModal').classList.add('show');
+        }
+
+        function closeInvoice() {
+            document.getElementById('invoiceModal').classList.remove('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Logout handler
+            var logoutButton = document.getElementById('logoutBtn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function () {
+                    window.tigerAuth.logout();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            window.tigerAuth.updateCartBadge();
+            window.tigerAuth.updateWishlistBadge();
+
+            renderOrders('all', '');
+
+            // Filter tabs
+            var tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    tabs.forEach(function (t) { t.classList.remove('active'); });
+                    tab.classList.add('active');
+                    var filter = tab.getAttribute('data-filter');
+                    var search = document.getElementById('orderSearchInput').value;
+                    renderOrders(filter, search);
+                });
+            });
+
+            // Search input
+            var searchInput = document.getElementById('orderSearchInput');
+            searchInput.addEventListener('input', function () {
+                var activeTab = document.querySelector('.filter-tab.active');
+                var filter = activeTab ? activeTab.getAttribute('data-filter') : 'all';
+                renderOrders(filter, searchInput.value);
+            });
+        });
+    </script>
+</body>
+</html>

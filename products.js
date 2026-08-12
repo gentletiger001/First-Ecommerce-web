@@ -106,9 +106,11 @@ function formatPrice(value) {
 
 function getProductCards(items) {
   return items.map(function (product) {
-    return '<article class="product-card">' +
+    var inWishlist = window.tigerAuth && window.tigerAuth.isInWishlist ? window.tigerAuth.isInWishlist(product.id) : false;
+    var heartColor = inWishlist ? '#ef4444' : '#64748b';
+    return '<article class="product-card" data-id="' + product.id + '">' +
       (product.discount ? '<div class="discount-badge">' + product.discount + '</div>' : '') +
-      '<div class="wishlist">♥</div>' +
+      '<div class="wishlist" data-product-id="' + product.id + '" style="color: ' + heartColor + ';">♥</div>' +
       '<img src="' + product.image + '" alt="' + product.alt + '">' +
       '<h3>' + product.name + '</h3>' +
       '<p>' + product.description + '</p>' +
@@ -128,8 +130,6 @@ function renderProducts(options) {
   var status = document.getElementById(settings.statusId || 'productStatus');
   var filterCategory = settings.category || 'all';
   var searchText = (settings.searchText !== undefined) ? settings.searchText : (document.getElementById('productSearch') ? document.getElementById('productSearch').value.trim().toLowerCase() : '');
-
-  console.log('searchProducts fired with:', searchText); // Temporary debug log requested by the user.
 
   var visibleProducts = products.filter(function (product) {
     var matchesCategory = filterCategory === 'all' || product.category === filterCategory;
@@ -172,6 +172,7 @@ function handleAddToCartButton(button) {
 
   if (window.tigerAuth && window.tigerAuth.addToCart) {
     window.tigerAuth.addToCart({
+      id: selectedProduct.id,
       name: selectedProduct.name,
       price: selectedProduct.price,
       image: selectedProduct.image,
@@ -183,6 +184,17 @@ function handleAddToCartButton(button) {
     setTimeout(function () {
       button.textContent = originalText;
     }, 900);
+  }
+}
+
+function handleWishlistButton(wishlistBtn) {
+  var productId = Number(wishlistBtn.getAttribute('data-product-id'));
+  var selectedProduct = products.find(function (item) { return item.id === productId; });
+  if (!selectedProduct) return;
+
+  if (window.tigerAuth && window.tigerAuth.toggleWishlist) {
+    var isAdded = window.tigerAuth.toggleWishlist(selectedProduct);
+    wishlistBtn.style.color = isAdded ? '#ef4444' : '#64748b';
   }
 }
 
@@ -226,14 +238,21 @@ function setupProductListing(options) {
 }
 
 document.addEventListener('click', function (event) {
-  var clickedButton = event.target.closest('.add-to-cart');
-  if (!clickedButton) {
+  var wishlistBtn = event.target.closest('.wishlist');
+  if (wishlistBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    handleWishlistButton(wishlistBtn);
     return;
   }
 
-  event.preventDefault();
-  event.stopPropagation();
-  handleAddToCartButton(clickedButton);
+  var clickedButton = event.target.closest('.add-to-cart');
+  if (clickedButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    handleAddToCartButton(clickedButton);
+    return;
+  }
 });
 
 document.addEventListener('DOMContentLoaded', function () {

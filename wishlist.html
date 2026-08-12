@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist & Saved Items - Tiger Store</title>
+    <meta name="description" content="View your saved items and favorite electronics at Tiger Store.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            var currentUser = localStorage.getItem('currentUser');
+            var isAuthPage = ['login.html', 'signup.html'].indexOf(window.location.pathname.split('/').pop()) !== -1;
+            if (!isAuthPage && !currentUser) {
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --co-accent: #00b4d8;
+            --co-violet: #7b2ff7;
+            --co-bg-gradient: linear-gradient(135deg, #0f0c29 0%, #0a1628 40%, #0d2137 100%);
+        }
+
+        body.wishlist-page {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--co-bg-gradient);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .wishlist-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 5rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #90e0ef 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .wishlist-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 180, 216, 0.3);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .wishlist-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .wishlist-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.4rem;
+        }
+
+        .wishlist-card p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        .wishlist-price {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #90e0ef;
+            margin-bottom: 1rem;
+        }
+
+        .wishlist-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .btn-move-cart {
+            flex: 1;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #0066cc, #0052a3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-move-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-remove-wishlist {
+            padding: 0.75rem;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remove-wishlist:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .empty-wishlist {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            grid-column: 1 / -1;
+        }
+
+        .empty-wishlist-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="wishlist-page">
+    <!-- Header / Navbar -->
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <h1><a href="index.html" class="logo-link">Tiger store</a></h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+                <button>Search</button>
+            </div>
+            <div class="header-actions">
+                <a href="wishlist.html" class="header-link">Wishlist (<span class="wishlist-count">0</span>)</a>
+                <a href="profile.html" class="header-link">Profile</a>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+                <div class="cart">
+                    <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
+                    <span class="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">All Products</a>
+            <a href="electronics.html">Electronics</a>
+            <a href="orders.html">My Orders</a>
+            <a href="wishlist.html" class="active">Wishlist</a>
+            <a href="contact.html">Contact Us</a>
+            <a href="about.html">About Us</a>
+        </nav>
+    </header>
+
+    <div class="wishlist-wrapper">
+        <div class="page-header">
+            <h1>My Saved Favorites</h1>
+            <p>Keep track of items you love and add them to your cart anytime</p>
+        </div>
+
+        <div class="wishlist-grid" id="wishlistContainer"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Tiger Store provides quality electronics and accessories at competitive prices.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="index.html">Home</a>
+                <a href="products.html">Products</a>
+                <a href="orders.html">Orders</a>
+                <a href="wishlist.html">Wishlist</a>
+            </div>
+            <div class="footer-section">
+                <h4>Customer Service</h4>
+                <a href="#">Help Center</a>
+                <a href="#">Shipping Info</a>
+                <a href="#">Returns</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Info</h4>
+                <p style="color: #d4e0ff; font-size: 0.95rem;">Email: info@tigerstore.com</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <a href="#">Facebook</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2026 Tiger Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        function formatCurrency(amount) {
+            return '₦' + Number(amount).toLocaleString();
+        }
+
+        function renderWishlist() {
+            var container = document.getElementById('wishlistContainer');
+            var wishlist = window.tigerAuth.getWishlist();
+
+            if (!wishlist || !wishlist.length) {
+                container.innerHTML =
+                    '<div class="empty-wishlist">' +
+                    '<div class="empty-wishlist-icon">❤️</div>' +
+                    '<h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Your Wishlist is Empty</h2>' +
+                    '<p style="color: rgba(255, 255, 255, 0.5); margin-bottom: 2rem;">Click the heart icon on any product to save it here for later.</p>' +
+                    '<a href="products.html" style="display: inline-block; padding: 0.85rem 2rem; background: linear-gradient(135deg, #00b4d8, #7b2ff7); color: white; border-radius: 12px; text-decoration: none; font-weight: 700;">Explore Products</a>' +
+                    '</div>';
+                return;
+            }
+
+            container.innerHTML = wishlist.map(function (item) {
+                return '<div class="wishlist-card">' +
+                    '<div>' +
+                    (item.image ? '<img src="' + item.image + '" alt="' + item.name + '">' : '') +
+                    '<h3>' + item.name + '</h3>' +
+                    '<p>' + (item.description || 'Premium product available at Tiger Store.') + '</p>' +
+                    '<div class="wishlist-price">' + formatCurrency(item.price || 0) + '</div>' +
+                    '</div>' +
+                    '<div class="wishlist-actions">' +
+                    '<button class="btn-move-cart" onclick="moveToCart(' + item.id + ', \'' + item.name.replace(/'/g, "\\'") + '\', ' + item.price + ', \'' + item.image + '\')">Move to Cart</button>' +
+                    '<button class="btn-remove-wishlist" onclick="removeItem(' + item.id + ')">✕</button>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+
+            window.tigerAuth.updateWishlistBadge();
+        }
+
+        function moveToCart(id, name, price, image) {
+            window.tigerAuth.addToCart({ id: id, name: name, price: price, image: image, quantity: 1 });
+            window.tigerAuth.toggleWishlist({ id: id });
+            renderWishlist();
+        }
+
+        function removeItem(id) {
+            window.tigerAuth.toggleWishlist({ id: id });
+            renderWishlist();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var logoutButton = document.getElementById('logoutBtn');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function () {
+                    window.tigerAuth.logout();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            window.tigerAuth.updateCartBadge();
+            window.tigerAuth.updateWishlistBadge();
+            renderWishlist();
+        });
+    </script>
+</body>
+</html>

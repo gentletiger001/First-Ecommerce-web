@@ -69,15 +69,21 @@
                 <input type="text" placeholder="Search products...">
                 <button>Search</button>
             </div>
-            <div class="cart">
-                <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
-                <span class="cart-count">0</span>
+            <div class="header-actions">
+                <a href="wishlist.html" class="header-link">Wishlist (<span class="wishlist-count">0</span>)</a>
+                <a href="profile.html" class="header-link">Profile</a>
+                <div class="cart">
+                    <span class="cart-icon"><a href="cart.html" class="cart-link">🛒</a></span>
+                    <span class="cart-count">0</span>
+                </div>
             </div>
         </div>
         <nav class="nav-links">
             <a href="index.html">Home</a>
             <a href="products.html">All Products</a>
             <a href="electronics.html">Electronics</a>
+            <a href="orders.html">My Orders</a>
+            <a href="wishlist.html">Wishlist</a>
             <a href="contact.html">Contact Us</a>
             <a href="about.html">About Us</a>
             <a href="profile.html">Profile</a>
@@ -107,6 +113,10 @@
     <script src="auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            if (window.tigerAuth) {
+                window.tigerAuth.updateCartBadge();
+                window.tigerAuth.updateWishlistBadge();
+            }
             const profile = window.tigerAuth.getCurrentUser();
             if (!profile) {
                 window.location.href = 'login.html';

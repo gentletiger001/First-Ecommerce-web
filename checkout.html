@@ -1177,8 +1177,10 @@
             <h2 class="modal-title">Payment Successful! 🎉</h2>
             <p class="modal-subtitle">Your order has been placed and is being processed. You'll receive a confirmation email shortly.</p>
             <div class="order-ref" id="orderRef">ORDER #TGR-000000</div>
-            <br><br>
-            <a href="index.html" class="modal-btn">Continue Shopping</a>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
+                <a href="orders.html" class="modal-btn" style="background: linear-gradient(135deg, #00b4d8, #0066cc);">Track Your Order</a>
+                <a href="index.html" class="modal-btn" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">Continue Shopping</a>
+            </div>
         </div>
     </div>
 
@@ -1570,16 +1572,36 @@
                         payBtn.classList.remove('loading');
                         setStep(3);
 
-                        // Clear the cart
+                        var orderRef = generateOrderRef();
+
+                        // Get current cart items and shipping info
                         var currentUser = window.tigerAuth.getCurrentUser();
-                        if (currentUser) {
-                            currentUser.cart = [];
-                            window.tigerAuth.saveCurrentUser(currentUser);
-                            window.tigerAuth.updateCartBadge();
+                        var currentCart = currentUser ? (currentUser.cart || []) : [];
+
+                        var shippingInfo = {
+                            fullName: document.getElementById('shipFullName').value.trim(),
+                            email: document.getElementById('shipEmail').value.trim(),
+                            phone: document.getElementById('shipPhone').value.trim(),
+                            country: document.getElementById('shipCountry').value,
+                            address: document.getElementById('shipAddress').value.trim(),
+                            city: document.getElementById('shipCity').value.trim(),
+                            state: document.getElementById('shipState').value.trim(),
+                            zip: document.getElementById('shipZip').value.trim(),
+                            notes: document.getElementById('shipNotes').value.trim()
+                        };
+
+                        // Create persistent order
+                        if (window.tigerAuth && window.tigerAuth.createOrder) {
+                            window.tigerAuth.createOrder({
+                                id: orderRef,
+                                items: currentCart,
+                                shipping: shippingInfo,
+                                pricing: totals,
+                                paymentRef: reference
+                            });
                         }
 
                         // Show success modal
-                        var orderRef = generateOrderRef();
                         document.getElementById('orderRef').textContent = 'ORDER #' + orderRef;
                         document.getElementById('successModal').classList.add('show');
                         spawnConfetti();

@@ -27,6 +27,7 @@
                 <button id="searchButton" type="button">Search</button>
             </div>
             <div class="header-actions">
+                <a href="wishlist.html" class="header-link">Wishlist (<span class="wishlist-count">0</span>)</a>
                 <a href="profile.html" class="header-link">Profile</a>
                 <button id="logoutBtn" class="logout-btn">Logout</button>
                 <div class="cart">
@@ -39,6 +40,8 @@
             <a href="index.html">Home</a>
             <a href="products.html">All Products</a>
             <a href="electronics.html">Electronics</a>
+            <a href="orders.html">My Orders</a>
+            <a href="wishlist.html">Wishlist</a>
             <a href="contact.html">Contact Us</a>
             <a href="about.html">About Us</a>
         </nav>
@@ -175,6 +178,7 @@
             }
 
             window.tigerAuth.updateCartBadge();
+            window.tigerAuth.updateWishlistBadge();
         });
     </script>
 </body>
